@@ -1,0 +1,17 @@
+**/.DS_Store
+**/.git
+**/.gitignore
+**/.dockerignore
+**/.vscode
+**/.idea
+**/.claude
+**/CLAUDE.md
+**/__pycache__
+**/.venv
+**/.ruff_cache
+**/.coverage
+**/htmlcov
+**/db.sqlite3
+**/.env
+LICENSE
+README.md

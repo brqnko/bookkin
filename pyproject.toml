@@ -1,0 +1,33 @@
+[project]
+name = "bookkin"
+version = "0.1.0"
+description = "Django app served in a devcontainer"
+requires-python = ">=3.13"
+dependencies = [
+    "django>=5.2",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9",
+    "coverage>=7.6",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+extend-exclude = ["**/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "DJ"]
+
+[tool.coverage.run]
+source = ["."]
+omit = ["*/migrations/*", "*/tests.py", "manage.py", "config/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

@@ -1,0 +1,19 @@
+services:
+  app:
+    hostname: bookkin
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /workspace
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../:/workspace
+      - venv:/workspace/.venv
+      - uv-cache:/root/.cache/uv
+      - ~/.ssh:/root/.ssh:ro
+    command: sleep infinity
+
+volumes:
+  venv:
+  uv-cache:
