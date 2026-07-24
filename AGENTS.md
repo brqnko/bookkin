@@ -41,6 +41,10 @@ While changing code:
   domain operations in clearly named modules or model methods.
 - Use Django forms, validators, permissions, transactions, and ORM expressions
   before duplicating their behavior.
+- Add concise comments for Django-specific behavior that may not be obvious to
+  a developer familiar with general web development. Explain what the framework
+  does automatically and when it happens; do not restate the code or explain
+  general Python and database concepts.
 - Treat migrations as part of a model change. Generate schema migrations with
   Django, review them, and do not hand-edit generated migrations unless the
   change specifically requires a data or custom migration.
