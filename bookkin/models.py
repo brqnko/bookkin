@@ -12,9 +12,9 @@ class Book(models.Model):
     # editable=False keeps this field out of generated forms, including the admin.
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=72)
-    # FileField stores the file under book_covers/ in the configured storage.
-    # The database stores the storage path rather than the file itself.
-    cover_image = models.FileField(upload_to="book_covers/")
+    # BinaryField maps to the database's binary type, so Django stores and
+    # retrieves the complete image as bytes instead of using file storage.
+    cover_image = models.BinaryField()
 
     # Django uses this value when displaying a model instance, so the admin
     # shows the title instead of the UUID.
@@ -48,11 +48,6 @@ class Review(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(10)]
     )
 
-    # Django uses this value when displaying a review in the admin and other
-    # automatically generated model choices.
-    def __str__(self):
-        return f"{self.reviewer} - {self.book} ({self.rating}/10)"
-
     class Meta:
         # Migrations turn Meta.constraints into database constraints, applying
         # these rules even to writes that bypass Django form validation.
@@ -68,3 +63,8 @@ class Review(models.Model):
                 name="one_review_per_user_and_book",
             ),
         ]
+
+    # Django uses this value when displaying a review in the admin and other
+    # automatically generated model choices.
+    def __str__(self):
+        return f"{self.reviewer} - {self.book} ({self.rating}/10)"
