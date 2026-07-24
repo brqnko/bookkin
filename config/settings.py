@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Registering the AppConfig makes Django discover this app's models,
+    # migrations, templates, and other app-specific components.
+    'bookkin.apps.BookkinConfig',
 ]
 
 MIDDLEWARE = [
