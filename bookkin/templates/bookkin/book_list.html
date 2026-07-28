@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Books | Bookkin</title>
+  </head>
+  <body>
+    <main>
+      <p><a href="{% url 'bookkin:home' %}">Home</a></p>
+      <h1>Books</h1>
+      <ul>
+        {% for book in page %}
+          <li>
+            <a href="{% url 'bookkin:book-detail' book_id=book.id %}">
+              {{ book.title }}
+            </a>
+          </li>
+        {% empty %}
+          <li>No books are available.</li>
+        {% endfor %}
+      </ul>
+
+      {% if page.paginator.num_pages > 1 %}
+        <nav aria-label="Book list pages">
+          {% if page.has_previous %}
+            <form method="get">
+              <input
+                type="hidden"
+                name="page"
+                value="{{ page.previous_page_number }}"
+              >
+              <button type="submit">Previous</button>
+            </form>
+          {% endif %}
+          <span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+          {% if page.has_next %}
+            <form method="get">
+              <input
+                type="hidden"
+                name="page"
+                value="{{ page.next_page_number }}"
+              >
+              <button type="submit">Next</button>
+            </form>
+          {% endif %}
+        </nav>
+      {% endif %}
+    </main>
+  </body>
+</html>
