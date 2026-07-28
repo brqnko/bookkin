@@ -1,25 +1,37 @@
 import uuid
+from io import StringIO
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.core.management import call_command
+from django.core.management.base import CommandError
+from django.db.models import Count
 from django.test import TestCase
 from django.urls import reverse
 
+from .management.commands.seed_sample_data import (
+    JPEG_SIGNATURE,
+    LEGACY_SAMPLE_USERNAMES,
+    PNG_SIGNATURE,
+    SAMPLE_BOOKS,
+    SAMPLE_REVIEW_TEXTS,
+    SAMPLE_USERNAMES,
+    make_cover_png,
+)
 from .models import Book, Review
 
 
 class BookViewTests(TestCase):
     def setUp(self):
+        self.cover_image = make_cover_png((80, 100, 120))
         self.book = Book.objects.create(
             title="A Book to Review",
-            cover_image=b"cover",
+            cover_image=self.cover_image,
         )
 
-    def test_home(self):
-        response = self.client.get(reverse("bookkin:home"))
-
-        self.assertContains(response, "Bookkin home")
-
     def test_book_list_displays_books(self):
+        self.assertEqual(reverse("bookkin:book-list"), "/")
+
         response = self.client.get(reverse("bookkin:book-list"))
 
         self.assertEqual(response.status_code, 200)
@@ -29,11 +41,36 @@ class BookViewTests(TestCase):
             response,
             reverse("bookkin:book-detail", kwargs={"book_id": self.book.id}),
         )
+        self.assertContains(
+            response,
+            reverse("bookkin:book-cover", kwargs={"book_id": self.book.id}),
+        )
+        self.assertContains(response, "No reviews yet.")
+
+    def test_old_book_list_url_is_removed(self):
+        response = self.client.get("/books/")
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_book_list_searches_titles(self):
+        matching_book = Book.objects.create(
+            title="A Searchable Mystery",
+            cover_image=self.cover_image,
+        )
+
+        response = self.client.get(
+            reverse("bookkin:book-list"),
+            {"q": "searchable"},
+        )
+
+        self.assertEqual(list(response.context["page"]), [matching_book])
+        self.assertContains(response, matching_book.title)
+        self.assertNotContains(response, self.book.title)
 
     def test_book_list_is_paginated_with_previous_and_next_links(self):
         Book.objects.bulk_create(
             [
-                Book(title=f"Book {number:02}", cover_image=b"cover")
+                Book(title=f"Book {number:02}", cover_image=self.cover_image)
                 for number in range(10)
             ]
         )
@@ -67,16 +104,56 @@ class BookViewTests(TestCase):
             html=True,
         )
 
+    def test_pagination_preserves_title_search(self):
+        Book.objects.bulk_create(
+            [
+                Book(
+                    title=f"Search Result {number:02}",
+                    cover_image=self.cover_image,
+                )
+                for number in range(11)
+            ]
+        )
+
+        first_page = self.client.get(
+            reverse("bookkin:book-list"),
+            {"q": "Search Result"},
+        )
+        second_page = self.client.get(
+            reverse("bookkin:book-list"),
+            {
+                "q": "Search Result",
+                "page": 2,
+            },
+        )
+
+        self.assertContains(
+            first_page,
+            '<input type="hidden" name="q" value="Search Result">',
+            html=True,
+        )
+        self.assertEqual(len(second_page.context["page"]), 1)
+
     def test_book_detail_displays_book_and_reviews(self):
-        reviewer = get_user_model().objects.create_user(
-            username="reviewer",
+        first_reviewer = get_user_model().objects.create_user(
+            username="first-reviewer",
+            password="A-secure-password-314",
+        )
+        second_reviewer = get_user_model().objects.create_user(
+            username="second-reviewer",
             password="A-secure-password-314",
         )
         Review.objects.create(
-            reviewer=reviewer,
+            reviewer=first_reviewer,
             book=self.book,
             rating=8,
             text="A thoughtful review.",
+        )
+        Review.objects.create(
+            reviewer=second_reviewer,
+            book=self.book,
+            rating=4,
+            text="A different perspective.",
         )
 
         response = self.client.get(
@@ -86,9 +163,54 @@ class BookViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "bookkin/book_detail.html")
         self.assertContains(response, self.book.title)
-        self.assertContains(response, reviewer.username)
+        self.assertContains(response, first_reviewer.username)
+        self.assertContains(response, second_reviewer.username)
+        self.assertContains(response, "Average rating: 6.0 / 10")
         self.assertContains(response, "Rating: 8 / 10")
+        self.assertContains(response, "Rating: 4 / 10")
         self.assertContains(response, "A thoughtful review.")
+        self.assertContains(response, "A different perspective.")
+
+    def test_book_detail_clearly_indicates_no_reviews(self):
+        response = self.client.get(
+            reverse("bookkin:book-detail", kwargs={"book_id": self.book.id})
+        )
+
+        self.assertContains(response, "This book has no reviews yet.")
+        self.assertContains(response, "No reviews yet.")
+
+    def test_book_cover_returns_png_from_database(self):
+        response = self.client.get(
+            reverse("bookkin:book-cover", kwargs={"book_id": self.book.id})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["Content-Type"], "image/png")
+        self.assertEqual(response.content, self.cover_image)
+        self.assertEqual(response.headers["X-Content-Type-Options"], "nosniff")
+
+    def test_book_cover_rejects_non_image_data(self):
+        self.book.cover_image = b"not-an-image"
+        self.book.save(update_fields=["cover_image"])
+
+        response = self.client.get(
+            reverse("bookkin:book-cover", kwargs={"book_id": self.book.id})
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_book_cover_returns_downloaded_jpeg(self):
+        cover_image = JPEG_SIGNATURE + b"downloaded-cover"
+        self.book.cover_image = cover_image
+        self.book.save(update_fields=["cover_image"])
+
+        response = self.client.get(
+            reverse("bookkin:book-cover", kwargs={"book_id": self.book.id})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["Content-Type"], "image/jpeg")
+        self.assertEqual(response.content, cover_image)
 
     def test_book_detail_rejects_non_uuid_id(self):
         response = self.client.get("/books/not-a-uuid/")
@@ -110,7 +232,7 @@ class ReviewSubmissionTests(TestCase):
     def setUp(self):
         self.book = Book.objects.create(
             title="A Book to Review",
-            cover_image=b"cover",
+            cover_image=make_cover_png((80, 100, 120)),
         )
         self.user = get_user_model().objects.create_user(
             username="reviewer",
@@ -233,6 +355,121 @@ class ReviewSubmissionTests(TestCase):
         self.assertFalse(Review.objects.exists())
 
 
+class SampleDataCommandTests(TestCase):
+    @patch(
+        "bookkin.management.commands.seed_sample_data.download_cover_image",
+        return_value=JPEG_SIGNATURE + b"downloaded-cover",
+    )
+    def test_command_creates_repeatable_catalog_with_reviews_and_covers(
+        self,
+        download_cover,
+    ):
+        output = StringIO()
+
+        call_command("seed_sample_data", stdout=output)
+        call_command("seed_sample_data", stdout=output)
+
+        books = Book.objects.annotate(review_count=Count("reviews"))
+        self.assertEqual(books.count(), len(SAMPLE_BOOKS))
+        self.assertEqual(
+            Review.objects.count(),
+            sum(len(texts) for texts in SAMPLE_REVIEW_TEXTS.values()),
+        )
+        self.assertTrue(all(1 <= book.review_count <= 10 for book in books))
+        self.assertTrue(
+            all(bytes(book.cover_image).startswith(JPEG_SIGNATURE) for book in books)
+        )
+        self.assertEqual(download_cover.call_count, len(SAMPLE_BOOKS) * 2)
+        self.assertEqual(
+            get_user_model().objects.filter(username__in=SAMPLE_USERNAMES).count(),
+            len(SAMPLE_USERNAMES),
+        )
+        self.assertIn(
+            "Sample data ready: 12 books and 33 reviews. Downloaded 12 covers.",
+            output.getvalue(),
+        )
+
+    def test_offline_command_generates_png_covers(self):
+        call_command("seed_sample_data", offline=True, stdout=StringIO())
+
+        self.assertTrue(
+            all(
+                bytes(book.cover_image).startswith(PNG_SIGNATURE)
+                for book in Book.objects.all()
+            )
+        )
+
+    def test_command_renames_legacy_authors_without_changing_review_owners(self):
+        user_model = get_user_model()
+        existing_book = Book.objects.create(
+            title="An Existing Sample Book",
+            cover_image=make_cover_png((40, 50, 60)),
+        )
+        legacy_users = [
+            user_model.objects.create(username=username)
+            for username in LEGACY_SAMPLE_USERNAMES
+        ]
+        for user in legacy_users:
+            user.set_unusable_password()
+            user.save(update_fields=["password"])
+        existing_reviews = [
+            Review.objects.create(
+                book=existing_book,
+                reviewer=user,
+                rating=5,
+                text="An existing review.",
+            )
+            for user in legacy_users
+        ]
+
+        call_command("seed_sample_data", offline=True, stdout=StringIO())
+
+        for new_username, legacy_username, user, review in zip(
+            SAMPLE_USERNAMES,
+            LEGACY_SAMPLE_USERNAMES,
+            legacy_users,
+            existing_reviews,
+            strict=True,
+        ):
+            with self.subTest(username=new_username):
+                self.assertFalse(
+                    user_model.objects.filter(username=legacy_username).exists()
+                )
+                renamed_user = user_model.objects.get(username=new_username)
+                self.assertEqual(renamed_user.pk, user.pk)
+                review.refresh_from_db()
+                self.assertEqual(review.reviewer_id, renamed_user.pk)
+
+    def test_command_uses_curated_review_text_instead_of_template_copy(self):
+        call_command("seed_sample_data", offline=True, stdout=StringIO())
+
+        for title, expected_texts in SAMPLE_REVIEW_TEXTS.items():
+            with self.subTest(title=title):
+                actual_texts = set(
+                    Review.objects.filter(book__title=title).values_list(
+                        "text",
+                        flat=True,
+                    )
+                )
+                self.assertEqual(actual_texts, set(expected_texts))
+                self.assertTrue(
+                    all("sample review of" not in text.lower() for text in actual_texts)
+                )
+
+    def test_command_does_not_take_over_existing_login_user(self):
+        user_model = get_user_model()
+        existing_user = user_model.objects.create_user(
+            username=SAMPLE_USERNAMES[0],
+            password="A-secure-password-314",
+        )
+
+        with self.assertRaises(CommandError):
+            call_command("seed_sample_data", offline=True, stdout=StringIO())
+
+        existing_user.refresh_from_db()
+        self.assertTrue(existing_user.check_password("A-secure-password-314"))
+
+
 class SignupViewTests(TestCase):
     def setUp(self):
         self.signup_url = reverse("bookkin:signup")
@@ -257,7 +494,7 @@ class SignupViewTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, reverse("bookkin:home"))
+        self.assertRedirects(response, reverse("bookkin:book-list"))
         user = get_user_model().objects.get(username="new-reader")
         self.assertTrue(user.check_password("A-secure-password-314"))
         self.assertEqual(str(user.pk), self.client.session["_auth_user_id"])
@@ -278,7 +515,7 @@ class SignupViewTests(TestCase):
             get_user_model().objects.filter(username="new-reader").exists()
         )
 
-    def test_authenticated_user_is_redirected_home(self):
+    def test_authenticated_user_is_redirected_to_book_list(self):
         user = get_user_model().objects.create_user(
             username="existing-reader",
             password="A-secure-password-314",
@@ -287,7 +524,7 @@ class SignupViewTests(TestCase):
 
         response = self.client.get(self.signup_url)
 
-        self.assertRedirects(response, reverse("bookkin:home"))
+        self.assertRedirects(response, reverse("bookkin:book-list"))
 
 
 class LoginLogoutViewTests(TestCase):
@@ -318,7 +555,7 @@ class LoginLogoutViewTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, reverse("bookkin:home"))
+        self.assertRedirects(response, reverse("bookkin:book-list"))
         self.assertEqual(str(self.user.pk), self.client.session["_auth_user_id"])
 
     def test_valid_post_returns_user_to_safe_next_page(self):
@@ -348,19 +585,19 @@ class LoginLogoutViewTests(TestCase):
         self.assertTrue(response.context["form"].non_field_errors())
         self.assertNotIn("_auth_user_id", self.client.session)
 
-    def test_authenticated_user_is_redirected_from_login(self):
+    def test_authenticated_user_is_redirected_from_login_to_book_list(self):
         self.client.force_login(self.user)
 
         response = self.client.get(self.login_url)
 
-        self.assertRedirects(response, reverse("bookkin:home"))
+        self.assertRedirects(response, reverse("bookkin:book-list"))
 
     def test_post_logs_user_out(self):
         self.client.force_login(self.user)
 
         response = self.client.post(self.logout_url)
 
-        self.assertRedirects(response, reverse("bookkin:home"))
+        self.assertRedirects(response, reverse("bookkin:book-list"))
         self.assertNotIn("_auth_user_id", self.client.session)
 
     def test_get_does_not_log_user_out(self):

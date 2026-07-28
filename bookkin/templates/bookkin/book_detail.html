@@ -9,6 +9,16 @@
     <main>
       <p><a href="{% url 'bookkin:book-list' %}">Back to books</a></p>
       <h1>{{ book.title }}</h1>
+      <img
+        src="{% url 'bookkin:book-cover' book_id=book.id %}"
+        alt="Cover of {{ book.title }}"
+        width="240"
+      >
+      {% if book.review_count %}
+        <p>Average rating: {{ book.average_rating|floatformat:1 }} / 10</p>
+      {% else %}
+        <p>This book has no reviews yet.</p>
+      {% endif %}
 
       <section>
         <h2>Reviews</h2>
