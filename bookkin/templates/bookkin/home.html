@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bookkin home</title>
+  </head>
+  <body>
+    <main>
+      <h1>Bookkin home</h1>
+      {% if user.is_authenticated %}
+        <p>Signed in as {{ user.username }}</p>
+        <form method="post" action="{% url 'bookkin:logout' %}">
+          {% csrf_token %}
+          <button type="submit">Log out</button>
+        </form>
+      {% else %}
+        <p>
+          <a href="{% url 'bookkin:login' %}">Log in</a>
+          or
+          <a href="{% url 'bookkin:signup' %}">create an account</a>
+        </p>
+      {% endif %}
+    </main>
+  </body>
+</html>
