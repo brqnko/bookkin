@@ -47,6 +47,18 @@ class BookViewTests(TestCase):
         )
         self.assertContains(response, "No reviews yet.")
 
+    def test_book_list_uses_shared_accessible_layout(self):
+        response = self.client.get(reverse("bookkin:book-list"))
+
+        self.assertTemplateUsed(response, "bookkin/base.html")
+        self.assertContains(response, 'href="/static/bookkin/styles.css"')
+        self.assertContains(response, 'href="#main-content"')
+        self.assertContains(response, 'id="main-content"')
+        self.assertContains(response, 'aria-label="Primary navigation"')
+        self.assertContains(response, 'role="search"')
+        self.assertContains(response, 'for="book-search"')
+        self.assertContains(response, f'alt="Cover of {self.book.title}"')
+
     def test_old_book_list_url_is_removed(self):
         response = self.client.get("/books/")
 
@@ -455,6 +467,7 @@ class SampleDataCommandTests(TestCase):
                 self.assertTrue(
                     all("sample review of" not in text.lower() for text in actual_texts)
                 )
+                self.assertTrue(all(len(text) >= 180 for text in actual_texts))
 
     def test_command_does_not_take_over_existing_login_user(self):
         user_model = get_user_model()
@@ -511,6 +524,7 @@ class SignupViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("password2", response.context["form"].errors)
+        self.assertContains(response, 'role="alert"')
         self.assertFalse(
             get_user_model().objects.filter(username="new-reader").exists()
         )

@@ -1,22 +1,23 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sign up | Bookkin</title>
-  </head>
-  <body>
-    <main>
-      <h1>Create an account</h1>
-      <form method="post" action="{% url 'bookkin:signup' %}">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign up</button>
-      </form>
-      <p>
-        Already have an account?
-        <a href="{% url 'bookkin:login' %}">Log in</a>
-      </p>
-    </main>
-  </body>
-</html>
+{% extends "bookkin/base.html" %}
+
+{% block title %}Sign up | Bookkin{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+  <section class="auth-panel" aria-labelledby="signup-heading">
+    <h1 id="signup-heading">Create an account</h1>
+    <form
+      class="form-stack"
+      method="post"
+      action="{% url 'bookkin:signup' %}"
+    >
+      {% csrf_token %}
+      {% include "bookkin/includes/form_fields.html" with form=form %}
+      <button type="submit">Create account</button>
+    </form>
+    <p class="auth-panel__footer">
+      Already have an account?
+      <a href="{% url 'bookkin:login' %}">Log in</a>
+    </p>
+  </section>
+{% endblock %}

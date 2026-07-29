@@ -1,78 +1,117 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Books | Bookkin</title>
-  </head>
-  <body>
-    <main>
-      <h1>Books</h1>
-      <form method="get">
-        <label for="book-search">Search by title</label>
+{% extends "bookkin/base.html" %}
+
+{% block title %}Books | Bookkin{% endblock %}
+
+{% block content %}
+  <h1 class="visually-hidden">Book catalog</h1>
+
+  <section class="search-panel" aria-labelledby="search-heading">
+    <h2 id="search-heading" class="visually-hidden">Search books</h2>
+    <form class="search-form" method="get" role="search">
+      <label for="book-search">Book title</label>
+      <div class="search-form__controls">
         <input
           id="book-search"
           type="search"
           name="q"
           value="{{ query }}"
+          placeholder="Try “Frankenstein”"
         >
         <button type="submit">Search</button>
-      </form>
-      <ul>
-        {% for book in page %}
-          <li>
-            <img
-              src="{% url 'bookkin:book-cover' book_id=book.id %}"
-              alt="Cover of {{ book.title }}"
-              width="120"
-            >
-            <a href="{% url 'bookkin:book-detail' book_id=book.id %}">
-              {{ book.title }}
-            </a>
-            {% if book.review_count %}
-              <span>
-                Average rating: {{ book.average_rating|floatformat:1 }} / 10
-              </span>
-            {% else %}
-              <span>No reviews yet.</span>
-            {% endif %}
-          </li>
-        {% empty %}
-          <li>No books match your search.</li>
-        {% endfor %}
-      </ul>
-
-      {% if page.paginator.num_pages > 1 %}
-        <nav aria-label="Book list pages">
-          {% if page.has_previous %}
-            <form method="get">
-              {% if query %}
-                <input type="hidden" name="q" value="{{ query }}">
-              {% endif %}
-              <input
-                type="hidden"
-                name="page"
-                value="{{ page.previous_page_number }}"
-              >
-              <button type="submit">Previous</button>
-            </form>
-          {% endif %}
-          <span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
-          {% if page.has_next %}
-            <form method="get">
-              {% if query %}
-                <input type="hidden" name="q" value="{{ query }}">
-              {% endif %}
-              <input
-                type="hidden"
-                name="page"
-                value="{{ page.next_page_number }}"
-              >
-              <button type="submit">Next</button>
-            </form>
-          {% endif %}
-        </nav>
+      </div>
+    </form>
+    <p class="search-summary" aria-live="polite">
+      {% if query %}
+        {{ page.paginator.count }} result{{ page.paginator.count|pluralize }}
+        for “{{ query }}”.
+        <a href="{% url 'bookkin:book-list' %}">Clear search</a>
+      {% else %}
+        Showing {{ page.start_index }}–{{ page.end_index }} of
+        {{ page.paginator.count }} books.
       {% endif %}
-    </main>
-  </body>
-</html>
+    </p>
+  </section>
+
+  <section aria-labelledby="book-results-heading">
+    <h2 id="book-results-heading" class="visually-hidden">Book collection</h2>
+    <ul class="book-grid" role="list">
+      {% for book in page %}
+        <li>
+          <article class="book-card">
+            <a
+              class="book-card__cover-link"
+              href="{% url 'bookkin:book-detail' book_id=book.id %}"
+              aria-label="View details for {{ book.title }}"
+            >
+              <img
+                class="book-card__cover"
+                src="{% url 'bookkin:book-cover' book_id=book.id %}"
+                alt="Cover of {{ book.title }}"
+                width="240"
+                height="360"
+              >
+            </a>
+            <div class="book-card__body">
+              <h2>
+                <a href="{% url 'bookkin:book-detail' book_id=book.id %}">
+                  {{ book.title }}
+                </a>
+              </h2>
+              {% if book.review_count %}
+                <p
+                  class="book-card__rating"
+                  aria-label="Average rating: {{ book.average_rating|floatformat:1 }} out of 10"
+                >
+                  {{ book.average_rating|floatformat:1 }} / 10 average
+                  · {{ book.review_count }}
+                  review{{ book.review_count|pluralize }}
+                </p>
+              {% else %}
+                <p class="book-card__rating">No reviews yet.</p>
+              {% endif %}
+            </div>
+          </article>
+        </li>
+      {% empty %}
+        <li class="empty-state">
+          <h2>No books found</h2>
+          <p>Try a shorter title or clear your search to see every book.</p>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  {% if page.paginator.num_pages > 1 %}
+    <nav class="pagination" aria-label="Book list pages">
+      {% if page.has_previous %}
+        <form method="get">
+          {% if query %}
+            <input type="hidden" name="q" value="{{ query }}">
+          {% endif %}
+          <input
+            type="hidden"
+            name="page"
+            value="{{ page.previous_page_number }}"
+          >
+          <button type="submit">Previous</button>
+        </form>
+      {% endif %}
+      <span class="pagination__status" aria-current="page">
+        Page {{ page.number }} of {{ page.paginator.num_pages }}
+      </span>
+      {% if page.has_next %}
+        <form method="get">
+          {% if query %}
+            <input type="hidden" name="q" value="{{ query }}">
+          {% endif %}
+          <input
+            type="hidden"
+            name="page"
+            value="{{ page.next_page_number }}"
+          >
+          <button type="submit">Next</button>
+        </form>
+      {% endif %}
+    </nav>
+  {% endif %}
+{% endblock %}

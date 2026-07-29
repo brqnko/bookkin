@@ -29,6 +29,14 @@ class ReviewForm(forms.ModelForm):
     class Meta:
         model = Review
         fields = ["rating", "text"]
+        labels = {
+            "rating": "Rating (0–10)",
+            "text": "Your review",
+        }
+        help_texts = {
+            "rating": "Enter a whole number from 0 to 10.",
+            "text": "Share what worked or did not work for you.",
+        }
         widgets = {
             "rating": forms.NumberInput(attrs={"min": 0, "max": 10}),
             "text": forms.Textarea(attrs={"rows": 5}),

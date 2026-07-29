@@ -35,140 +35,223 @@ LEGACY_SAMPLE_USERNAMES = [f"sample_reader_{number}" for number in range(1, 6)]
 SAMPLE_REVIEW_TEXTS = {
     "Pride and Prejudice": [
         (
-            "The witty dialogue never clicked for me, and I struggled to care "
-            "about the romance."
+            "I could see why the dialogue is celebrated, but its wit rarely landed "
+            "for me. The social misunderstandings began to feel repetitive, and I "
+            "never became invested enough in the romance to enjoy the slow build."
         ),
     ],
     "Moby-Dick": [
         (
-            "There are a few striking scenes, but the long digressions made "
-            "this a chore to finish."
+            "The scenes at sea can be vivid and genuinely tense, especially when "
+            "Ahab's obsession takes over the crew. Still, the long technical "
+            "digressions repeatedly broke the momentum and made finishing it feel "
+            "more like an assignment than an adventure."
         ),
-        ("A fascinating obsession story buried beneath far more detail than I wanted."),
+        (
+            "I admired the scale of the story and the strange atmosphere aboard the "
+            "Pequod. Some chapters are fascinating, while others disappear so far "
+            "into whale anatomy that I lost the emotional thread. It was memorable, "
+            "but not consistently enjoyable."
+        ),
     ],
     "Frankenstein": [
         (
-            "The central idea is powerful, though the slow pacing kept "
-            "pulling me out of the story."
+            "The questions about responsibility and ambition are still powerful, "
+            "and the creature's situation is more tragic than I expected. However, "
+            "the layered narration and slow stretches kept distancing me whenever "
+            "the story started to build momentum."
         ),
         (
-            "More thoughtful and tragic than I expected, especially in the "
-            "creature's chapters."
+            "This was much more thoughtful and sorrowful than the simple monster "
+            "story I had imagined. The creature's chapters gave the novel real "
+            "emotional weight, and Victor's repeated failures made the consequences "
+            "feel painfully inevitable."
         ),
         (
-            "A haunting, beautifully written novel about loneliness, "
-            "ambition, and responsibility."
+            "A haunting and beautifully written novel about loneliness, ambition, "
+            "and the obligations a creator has toward what they bring into the "
+            "world. The shifting sympathies between Victor and the creature kept me "
+            "thinking long after the final page."
         ),
     ],
     "Jane Eyre": [
         (
-            "Jane is a compelling narrator, even if parts of the romance "
-            "have not aged well."
-        ),
-        ("I loved Jane's fierce independence and the novel's dark, atmospheric mood."),
-        (
-            "The relationship at the center made me deeply uncomfortable, "
-            "and I never became invested."
+            "Jane's voice is direct, intelligent, and easy to root for, especially "
+            "when she insists on keeping her independence. Some parts of the "
+            "central romance have aged poorly, though, and that tension kept me from "
+            "fully embracing the ending."
         ),
         (
-            "Jane herself is memorable, but the story felt overly long and "
-            "melodramatic to me."
+            "I loved Jane's fierce independence and the way the novel lets her moral "
+            "convictions guide the story. Thornfield has a wonderfully uneasy "
+            "atmosphere, and even the slower sections added to the sense that "
+            "something unsettling was waiting behind a closed door."
+        ),
+        (
+            "Jane is a strong narrator, but the relationship at the center made me "
+            "deeply uncomfortable from its earliest stages. Rochester's behavior "
+            "overwhelmed the qualities I liked elsewhere, so I never became invested "
+            "in the outcome the novel wanted me to celebrate."
+        ),
+        (
+            "There are memorable scenes and Jane herself has a clear, compelling "
+            "personality. Even so, the story felt overly long and increasingly "
+            "melodramatic, with several coincidences that pulled me out of the "
+            "otherwise grounded emotional journey."
         ),
     ],
     "The Great Gatsby": [
-        ("Short, sharp, and full of memorable images; the ending stayed with me."),
         (
-            "I disliked every character and found the symbolism far less "
-            "moving than I expected."
+            "The novel is short, sharp, and full of images that make its parties and "
+            "summer heat feel immediate. I especially liked how the glamorous "
+            "surface gradually gives way to disappointment. The final pages stayed "
+            "with me after the plot details had faded."
         ),
-        "The prose is polished, but the distant characters left me cold.",
-        ("A quick, beautifully written read, though its emotional impact felt uneven."),
         (
-            "The language is gorgeous, and the emptiness beneath all that "
-            "glamour comes through perfectly."
+            "I found nearly every character unpleasant without finding their flaws "
+            "particularly revealing. The famous symbols felt heavy-handed rather "
+            "than moving, and the emotional distance kept the tragedy from landing. "
+            "Its brevity was the main reason I finished."
+        ),
+        (
+            "The prose is polished and there are individual descriptions I wanted "
+            "to reread, but the characters remained too distant for me. I understood "
+            "the emptiness the book was exposing without feeling much when that "
+            "emptiness finally caught up with them."
+        ),
+        (
+            "This was a quick and beautifully written read, with a carefully built "
+            "sense of longing beneath every party scene. Some of the characters felt "
+            "more like symbols than people, so its emotional impact was uneven, but "
+            "the atmosphere is hard to forget."
+        ),
+        (
+            "The language is gorgeous, and the emptiness beneath all that glamour "
+            "comes through perfectly. Gatsby's hope feels both absurd and painfully "
+            "human, while Nick's distance gives the story a dreamlike quality. I "
+            "understood immediately why the ending is so often quoted."
         ),
     ],
     "The Picture of Dorian Gray": [
         (
-            "Darkly funny, elegant, and unsettling from beginning to end. "
-            "Every conversation feels dangerously clever."
+            "Darkly funny, elegant, and unsettling from beginning to end. Every "
+            "conversation feels dangerously clever, yet the wit never hides the "
+            "damage caused by Dorian's choices. The portrait is a brilliant device, "
+            "and the final sequence delivers exactly the reckoning I hoped for."
         ),
     ],
     "Little Women": [
         (
-            "The episodic story moved too slowly for me, and the moral "
-            "lessons felt heavy-handed."
+            "I liked the warmth between the sisters, but the episodic structure made "
+            "the story feel much longer than it needed to be. Many chapters end with "
+            "a lesson stated too directly for my taste, and the constant moralizing "
+            "eventually overshadowed the family moments."
         ),
         (
-            "The sisters are charming, but the uneven pacing made it "
-            "difficult to stay engaged."
+            "The March sisters have distinct personalities, and their home life has "
+            "a comforting, lived-in quality. I enjoyed watching their ambitions "
+            "change as they grew older, although the uneven pacing and abrupt time "
+            "jumps sometimes made it difficult to stay engaged."
         ),
     ],
     "The Adventures of Sherlock Holmes": [
         (
-            "A few mysteries were clever, but the formula became repetitive "
-            "quite quickly."
+            "A few mysteries have clever premises, and Holmes is entertaining when "
+            "he explains a detail everyone else missed. After several stories, "
+            "though, the formula became predictable and the supporting characters "
+            "rarely had enough depth to make the cases matter."
         ),
         (
-            "Entertaining cases and a great detective, though some solutions "
-            "feel a little too convenient."
+            "These are entertaining cases with a wonderfully confident detective at "
+            "their center. The short-story format keeps things moving, though a few "
+            "solutions depend on information the reader could never have guessed. "
+            "Watson's narration gives the collection plenty of charm."
         ),
         (
-            "Smart, brisk mysteries with an iconic partnership at their "
-            "center. I enjoyed nearly every case."
+            "Smart, brisk mysteries built around one of literature's best "
+            "partnerships. Holmes supplies the spectacle, but Watson's curiosity and "
+            "loyalty make the stories inviting. I enjoyed the variety of clients and "
+            "settings, and nearly every case had at least one great reveal."
         ),
     ],
     "The Time Machine": [
         (
-            "The ideas are more interesting than the characters, but it "
-            "remains a worthwhile short read."
+            "The future society is an intriguing thought experiment, and the gradual "
+            "discovery of what connects the Eloi and Morlocks is effective. The "
+            "characters are little more than vehicles for those ideas, but the book "
+            "is concise enough to remain a worthwhile read."
         ),
         (
-            "A compact and imaginative story with a surprisingly bleak view "
-            "of the future."
+            "A compact and imaginative adventure with a surprisingly bleak view of "
+            "human progress. The ruined future landscapes are described with real "
+            "wonder, and the quiet final journey pushes the idea far beyond a simple "
+            "story about an unusual machine."
         ),
         (
-            "The flat characters and rushed storytelling gave me nothing to "
-            "connect with."
+            "The story moved so quickly that its people never felt like more than "
+            "labels attached to an argument. I wanted to care about the Time "
+            "Traveller's discoveries, but the rushed storytelling and flat "
+            "characters gave me almost nothing emotional to hold onto."
         ),
         (
-            "The future world is intriguing, but the story feels more like a "
-            "sketch than a finished novel."
+            "The divided future world is intriguing, and I liked the darker "
+            "implications beneath its initially peaceful appearance. Still, the "
+            "narrative rushes through each discovery before developing it, leaving "
+            "the whole book feeling more like a sketch than a finished novel."
         ),
     ],
     "Dracula": [
-        ("The journal format builds suspense well, although the middle section drags."),
         (
-            "Genuinely eerie and full of unforgettable scenes. The shifting "
-            "narrators made the danger feel immediate."
+            "The journal and letter format builds suspense by letting each character "
+            "notice a different piece of the danger. The opening in Transylvania is "
+            "excellent, and several later scenes are just as tense, although the "
+            "middle section drags before the group takes action."
         ),
         (
-            "The opening was excellent, but the repetitive later chapters "
-            "drained all the tension for me."
+            "Genuinely eerie and full of unforgettable scenes, from the castle to "
+            "the arrival of the ship in Whitby. The shifting narrators made the "
+            "danger feel immediate and gave the group a real sense of camaraderie. "
+            "Even knowing the story, I found it gripping."
         ),
         (
-            "Atmospheric and influential, but much slower and more "
-            "repetitive than I expected."
+            "The opening chapters created a level of dread that the rest of the book "
+            "never matched for me. Once the characters began comparing notes, they "
+            "repeated the same fears and plans so often that the tension disappeared. "
+            "The final confrontation also felt strangely rushed."
         ),
         (
-            "A wonderfully creepy classic with a strong cast and an "
-            "especially memorable beginning."
+            "It is easy to see how influential the imagery and structure have been, "
+            "and the strongest moments are still genuinely atmospheric. At the same "
+            "time, the group discussions and repeated explanations slowed the hunt "
+            "considerably. I admired it more than I enjoyed it."
+        ),
+        (
+            "A wonderfully creepy classic with a strong ensemble and an especially "
+            "memorable beginning. Mina's intelligence keeps the investigation "
+            "grounded, while the fragmented documents make each new clue satisfying. "
+            "Some passages are slow, but the atmosphere carried me through them."
         ),
     ],
     "The Secret Garden": [
         (
-            "Warm, hopeful, and deeply satisfying. Watching both the garden "
-            "and the children come back to life was lovely."
+            "Warm, hopeful, and deeply satisfying without pretending its children "
+            "are pleasant from the start. Watching the garden return to life "
+            "alongside Mary and Colin gives the story a simple but effective shape. "
+            "The descriptions of outdoor work made the transformation feel earned."
         ),
     ],
     "The Wonderful Wizard of Oz": [
         (
-            "The adventure felt thin and repetitive, and none of the "
-            "characters held my attention."
+            "The journey felt like a chain of similar obstacles rather than a story "
+            "that was building toward something. Dorothy's companions each have a "
+            "clear trait, but none developed enough to hold my attention, and the "
+            "resolution made the earlier danger feel pointless."
         ),
         (
-            "There are some imaginative moments, but the simple plot did not "
-            "offer enough to keep me engaged."
+            "There are imaginative places and a few playful ideas that must have "
+            "felt especially fresh when the book appeared. For me, the simple plot "
+            "and repetitive encounters did not offer enough variety, although the "
+            "companions' loyalty gave the journey some charm."
         ),
     ],
 }

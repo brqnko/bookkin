@@ -1,25 +1,26 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Log in | Bookkin</title>
-  </head>
-  <body>
-    <main>
-      <h1>Log in</h1>
-      <form method="post" action="{% url 'bookkin:login' %}">
-        {% csrf_token %}
-        {% if next_url %}
-          <input type="hidden" name="next" value="{{ next_url }}">
-        {% endif %}
-        {{ form.as_p }}
-        <button type="submit">Log in</button>
-      </form>
-      <p>
-        Need an account?
-        <a href="{% url 'bookkin:signup' %}">Sign up</a>
-      </p>
-    </main>
-  </body>
-</html>
+{% extends "bookkin/base.html" %}
+
+{% block title %}Log in | Bookkin{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+  <section class="auth-panel" aria-labelledby="login-heading">
+    <h1 id="login-heading">Log in</h1>
+    <form
+      class="form-stack"
+      method="post"
+      action="{% url 'bookkin:login' %}"
+    >
+      {% csrf_token %}
+      {% if next_url %}
+        <input type="hidden" name="next" value="{{ next_url }}">
+      {% endif %}
+      {% include "bookkin/includes/form_fields.html" with form=form %}
+      <button type="submit">Log in</button>
+    </form>
+    <p class="auth-panel__footer">
+      Need an account?
+      <a href="{% url 'bookkin:signup' %}">Create one</a>
+    </p>
+  </section>
+{% endblock %}

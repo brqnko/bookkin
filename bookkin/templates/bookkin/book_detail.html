@@ -1,59 +1,94 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ book.title }} | Bookkin</title>
-  </head>
-  <body>
-    <main>
-      <p><a href="{% url 'bookkin:book-list' %}">Back to books</a></p>
+{% extends "bookkin/base.html" %}
+
+{% block title %}{{ book.title }} | Bookkin{% endblock %}
+
+{% block content %}
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <ol>
+      <li><a href="{% url 'bookkin:book-list' %}">Books</a></li>
+      <li aria-hidden="true">/</li>
+      <li aria-current="page">{{ book.title }}</li>
+    </ol>
+  </nav>
+
+  <article class="book-detail">
+    <img
+      class="book-detail__cover"
+      src="{% url 'bookkin:book-cover' book_id=book.id %}"
+      alt="Cover of {{ book.title }}"
+      width="480"
+      height="720"
+    >
+    <div class="book-detail__summary">
       <h1>{{ book.title }}</h1>
-      <img
-        src="{% url 'bookkin:book-cover' book_id=book.id %}"
-        alt="Cover of {{ book.title }}"
-        width="240"
-      >
       {% if book.review_count %}
-        <p>Average rating: {{ book.average_rating|floatformat:1 }} / 10</p>
+        <p
+          class="rating-summary"
+          aria-label="Average rating: {{ book.average_rating|floatformat:1 }} out of 10 from {{ book.review_count }} reviews"
+        >
+          Average rating: {{ book.average_rating|floatformat:1 }} / 10
+        </p>
+        <p>
+          Based on {{ book.review_count }}
+          review{{ book.review_count|pluralize }}.
+        </p>
       {% else %}
+        <p>Not rated yet</p>
         <p>This book has no reviews yet.</p>
       {% endif %}
+    </div>
+  </article>
 
-      <section>
-        <h2>Reviews</h2>
-        {% for review in reviews %}
-          <article>
+  <section class="content-section" aria-labelledby="reviews-heading">
+    <div class="section-heading">
+      <h2 id="reviews-heading">Reader reviews</h2>
+      {% if book.review_count %}
+        <p>{{ book.review_count }} total</p>
+      {% endif %}
+    </div>
+    <div class="review-list">
+      {% for review in reviews %}
+        <article class="review-card">
+          <header class="review-card__header">
             <h3>{{ review.reviewer.username }}</h3>
-            <p>Rating: {{ review.rating }} / 10</p>
-            <p>{{ review.text|linebreaksbr }}</p>
-          </article>
-        {% empty %}
-          <p>No reviews yet.</p>
-        {% endfor %}
-      </section>
+            <p
+              class="rating"
+              aria-label="Rating: {{ review.rating }} out of 10"
+            >
+              Rating: {{ review.rating }} / 10
+            </p>
+          </header>
+          <p class="review-card__text">{{ review.text|linebreaksbr }}</p>
+        </article>
+      {% empty %}
+        <div class="empty-state">
+          <h3>No reviews yet.</h3>
+          <p>Be the first reader to share an opinion about this book.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
 
-      <section>
-        <h2>Write a review</h2>
-        {% if user.is_authenticated %}
-          {% if show_review_form %}
-            <form method="post">
-              {% csrf_token %}
-              {{ review_form.as_p }}
-              <button type="submit">Submit review</button>
-            </form>
-          {% else %}
-            <p>You have already reviewed this book.</p>
-          {% endif %}
-        {% else %}
-          <p>
-            <a href="{% url 'bookkin:login' %}?next={{ request.path|urlencode }}">
-              Log in
-            </a>
-            to write a review.
-          </p>
-        {% endif %}
-      </section>
-    </main>
-  </body>
-</html>
+  <section class="content-section review-form-panel" aria-labelledby="review-form-heading">
+    <h2 id="review-form-heading">Write a review</h2>
+    {% if user.is_authenticated %}
+      {% if show_review_form %}
+        <p>Your rating must be a whole number from 0 to 10.</p>
+        <form class="form-stack" method="post">
+          {% csrf_token %}
+          {% include "bookkin/includes/form_fields.html" with form=review_form %}
+          <button type="submit">Submit review</button>
+        </form>
+      {% else %}
+        <p role="status">You have already reviewed this book.</p>
+      {% endif %}
+    {% else %}
+      <p>
+        <a href="{% url 'bookkin:login' %}?next={{ request.path|urlencode }}">
+          Log in
+        </a>
+        to write a review.
+      </p>
+    {% endif %}
+  </section>
+{% endblock %}
