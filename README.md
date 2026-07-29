@@ -38,6 +38,54 @@ uv run python manage.py runserver 0.0.0.0:8000
 
 Then open <http://localhost:8000/> on the host.
 
+## Deploy with Docker
+
+The production image runs Gunicorn over plain HTTP on port 8000. TLS terminates
+at the separate nginx container.
+
+Create an ignored `.env` file with deployment-specific values:
+
+```dotenv
+DJANGO_SECRET_KEY=replace-with-a-long-random-value
+DJANGO_ALLOWED_HOSTS=books.example.com
+DJANGO_CSRF_TRUSTED_ORIGINS=https://books.example.com
+```
+
+Build the image, create the persistent SQLite volume and Docker network, and
+apply migrations:
+
+```bash
+docker build --file infra/Dockerfile --tag bookkin:latest .
+docker volume create bookkin-data
+docker network create bookkin
+docker run --rm \
+  --env-file .env \
+  --volume bookkin-data:/data \
+  bookkin:latest \
+  python manage.py migrate
+```
+
+Start the application on the network shared with nginx:
+
+```bash
+docker run --detach \
+  --name bookkin-app \
+  --restart unless-stopped \
+  --network bookkin \
+  --env-file .env \
+  --volume bookkin-data:/data \
+  bookkin:latest
+```
+
+Configure nginx to proxy to `http://bookkin-app:8000`, preserve the original
+`Host`, and replace `X-Forwarded-Proto` with nginx's request scheme. Do not expose
+port 8000 publicly. If nginx runs on the host instead of the shared Docker
+network, add `--publish 127.0.0.1:8000:8000` to the application command.
+
+Run `python manage.py migrate` with the same environment and volume before
+starting a newly deployed image. The container does not run migrations
+automatically, so concurrent replicas cannot race during startup.
+
 ## HTTP endpoints
 
 The book views show a paginated catalog and each book's reviews. Signed-in users

@@ -6,21 +6,34 @@ these.
 
 ## Current state
 
-`bookkin` is a Django project scaffold, not yet a generated Django site. At
-present there is no `manage.py`, settings module, application package, database
-schema, or domain model. Treat those omissions as undecided design, not as files
-to reconstruct from convention.
+`bookkin` is a server-rendered Django web application for browsing books and
+submitting reader reviews.
 
+- Project configuration lives in `config/`; the `bookkin/` app contains the
+  domain models, forms, views, URLs, templates, static CSS, tests, and sample-data
+  command.
+- SQLite is the current database. `Book` stores its cover image as binary data,
+  and `Review` belongs to a book and Django authentication user. The migrations
+  in `bookkin/migrations/` are the schema history.
+- The UI provides a searchable, paginated catalog, book details, authentication,
+  and one review per signed-in user and book. It uses Django templates and
+  responsive CSS without a JavaScript or HTMX frontend.
+- `seed_sample_data` creates the demonstration catalog and supports both
+  downloaded and offline-generated cover images.
+- The current production path is a Docker image running Gunicorn and WhiteNoise
+  behind an nginx TLS-terminating proxy, with SQLite stored on a persistent
+  volume. See `README.md` and `infra/Dockerfile`.
 - `pyproject.toml` and `uv.lock` are the dependency sources of truth.
 - Python 3.13 and `uv` are the supported toolchain.
 - The devcontainer mounts the repository at `/workspace`; commands below also
   work from the repository root on a host with `uv`.
-- Do not assume a database, queue, cache, API framework, frontend stack, or
-  deployment target until the repository or the task establishes one.
+- There is no queue, cache, API framework, or client-side application. Do not
+  introduce one unless the task establishes the need.
 
-If a task depends on a missing foundational decision with lasting consequences,
-surface that decision instead of silently introducing an architecture. Small,
-reversible choices may use the simplest Django-native option.
+Changes to the database engine, binary cover storage, frontend architecture, or
+deployment topology are foundational decisions. Surface them instead of
+silently replacing the current design. Small, reversible choices may use the
+simplest Django-native option.
 
 ## Working agreement
 
@@ -80,7 +93,7 @@ uv run ruff format --check .
 uv run ruff check .
 ```
 
-Once `manage.py` exists, also run:
+Also run:
 
 ```bash
 uv run python manage.py check
@@ -95,10 +108,9 @@ uv run coverage run manage.py test
 uv run coverage report
 ```
 
-If a command is unavailable because the project is still pre-scaffold, say so
-explicitly; do not report it as passing. If a check fails for an unrelated,
-pre-existing reason, record the exact failure and still run all other useful
-checks.
+If a command is unavailable in the current environment, say so explicitly; do
+not report it as passing. If a check fails for an unrelated, pre-existing reason,
+record the exact failure and still run all other useful checks.
 
 Before completion, review `git diff --check` and the final diff. Report:
 

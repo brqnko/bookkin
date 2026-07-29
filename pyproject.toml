@@ -5,6 +5,8 @@ description = "Django app served in a devcontainer"
 requires-python = ">=3.13"
 dependencies = [
     "django>=5.2",
+    "gunicorn>=26.0.0",
+    "whitenoise>=6.12.0",
 ]
 
 [dependency-groups]
