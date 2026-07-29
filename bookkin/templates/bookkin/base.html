@@ -1,0 +1,64 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#173f36">
+    <title>{% block title %}Bookkin{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'bookkin/styles.css' %}">
+  </head>
+  <body class="{% block body_class %}{% endblock %}">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <header class="site-header">
+      <div class="site-header__inner container">
+        <a class="site-brand" href="{% url 'bookkin:book-list' %}">
+          Bookkin
+        </a>
+        <nav class="site-nav" aria-label="Primary navigation">
+          {% if user.is_authenticated %}
+            <span class="site-nav__user">Signed in as {{ user.username }}</span>
+            <form
+              class="site-nav__form"
+              method="post"
+              action="{% url 'bookkin:logout' %}"
+            >
+              {% csrf_token %}
+              <button type="submit">Log out</button>
+            </form>
+          {% else %}
+            <a
+              href="{% url 'bookkin:login' %}"
+              {% if request.resolver_match.url_name == "login" %}
+                aria-current="page"
+              {% endif %}
+            >
+              Log in
+            </a>
+            <a
+              class="site-nav__cta"
+              href="{% url 'bookkin:signup' %}"
+              {% if request.resolver_match.url_name == "signup" %}
+                aria-current="page"
+              {% endif %}
+            >
+              Sign up
+            </a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+
+    <main id="main-content" class="site-main container" tabindex="-1">
+      {% if messages %}
+        <div class="messages" aria-live="polite">
+          {% for message in messages %}
+            <p class="message">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>
